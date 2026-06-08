@@ -1,0 +1,754 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--yt-red:#FF0000;--yt-dark:#0F0F0F;--sidebar-w:200px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.app{font-family:var(--font-sans);background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;min-height:600px}
+.topbar{background:#FF0000;display:flex;align-items:center;gap:10px;padding:0 16px;height:52px}
+.topbar-logo{color:white;font-weight:700;font-size:15px;letter-spacing:0.5px;display:flex;align-items:center;gap:6px}
+.topbar-logo span{opacity:0.7;font-weight:400}
+.topbar-nav{display:flex;align-items:center;gap:4px;margin-left:auto}
+.tnav{background:rgba(255,255,255,0.15);color:white;border:none;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font-sans)}
+.tnav:hover{background:rgba(255,255,255,0.25)}
+.tnav.active{background:rgba(255,255,255,0.9);color:#CC0000}
+.tnav i{font-size:14px}
+.body{display:flex;min-height:548px}
+.sidebar{width:var(--sidebar-w);border-right:0.5px solid var(--color-border-tertiary);padding:8px 0;flex-shrink:0;background:var(--color-background-primary)}
+.snav{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;font-size:13px;color:var(--color-text-secondary);border-radius:0}
+.snav:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.snav.active{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500}
+.snav i{font-size:16px;flex-shrink:0}
+.sdivider{height:0.5px;background:var(--color-border-tertiary);margin:6px 0}
+.slabel{font-size:11px;color:var(--color-text-tertiary);padding:8px 14px 4px;text-transform:uppercase;letter-spacing:0.5px}
+.content{flex:1;overflow-x:hidden;min-width:0}
+.panel{display:none;padding:16px}
+.panel.active{display:block}
+.phead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.ptitle{font-size:16px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;gap:8px}
+.ptitle i{font-size:18px;color:#FF0000}
+.date-sel{font-size:12px;padding:5px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px}
+.kpi-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;display:flex;align-items:center;gap:4px}
+.kpi-val{font-size:22px;font-weight:500;color:var(--color-text-primary);line-height:1.2}
+.kpi-delta{font-size:11px;margin-top:3px}
+.kpi-delta.up{color:#16a34a}
+.kpi-delta.down{color:#dc2626}
+.chart-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px;margin-bottom:12px}
+.chart-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.chart-wrap{height:160px;position:relative}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:100%;padding-bottom:20px}
+.bar-col{display:flex;flex-direction:column;align-items:center;flex:1;height:100%}
+.bar-inner{width:100%;border-radius:3px 3px 0 0;background:#FF0000;opacity:0.85;transition:opacity 0.15s;cursor:pointer;min-height:2px}
+.bar-inner:hover{opacity:1}
+.bar-label{font-size:10px;color:var(--color-text-tertiary);margin-top:4px;white-space:nowrap}
+.bar-spacer{flex:1}
+.line-chart{width:100%;height:100%}
+.retention-wrap{height:120px;position:relative;margin-bottom:8px}
+.ret-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.ret-time{font-size:11px;color:var(--color-text-tertiary);width:36px;flex-shrink:0;text-align:right}
+.ret-bar-bg{flex:1;height:10px;background:var(--color-background-secondary);border-radius:5px;overflow:hidden}
+.ret-bar-fill{height:100%;border-radius:5px;background:#FF0000}
+.ret-pct{font-size:11px;color:var(--color-text-secondary);width:32px;text-align:right}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px}
+.demo-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.demo-label{font-size:12px;color:var(--color-text-secondary);width:80px;flex-shrink:0}
+.demo-bar-bg{flex:1;height:8px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden}
+.demo-bar-fill{height:100%;border-radius:4px}
+.demo-pct{font-size:12px;color:var(--color-text-secondary);width:32px;text-align:right}
+.earn-big{font-size:32px;font-weight:500;color:var(--color-text-primary);margin:8px 0 4px}
+.earn-sub{font-size:12px;color:var(--color-text-secondary)}
+.traffic-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.traffic-row:last-child{border-bottom:none}
+.traffic-src{font-size:13px;color:var(--color-text-primary);flex:1;display:flex;align-items:center;gap:6px}
+.traffic-src i{font-size:14px;color:var(--color-text-secondary)}
+.traffic-bar-bg{width:80px;height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden}
+.traffic-bar-fill{height:100%;border-radius:3px;background:#FF0000}
+.traffic-pct{font-size:12px;color:var(--color-text-secondary);width:36px;text-align:right}
+.vid-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer}
+.vid-row:last-child{border-bottom:none}
+.vid-row:hover .vid-title{color:#FF0000}
+.vid-thumb{width:72px;height:40px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden;flex-shrink:0}
+.vid-thumb img{width:100%;height:100%;object-fit:cover}
+.vid-thumb-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--color-text-tertiary);font-size:14px}
+.vid-title{font-size:13px;font-weight:500;color:var(--color-text-primary);flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4}
+.vid-stat{font-size:12px;color:var(--color-text-secondary);white-space:nowrap;text-align:right}
+.vid-stat span{display:block}
+.search-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.search-row input,.search-row select{font-size:13px;padding:7px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.search-row input{flex:1;min-width:160px}
+.run-btn{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);padding:7px 14px;border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;color:var(--color-text-primary);display:flex;align-items:center;gap:5px;white-space:nowrap;font-family:var(--font-sans)}
+.run-btn:hover{border-color:#FF0000;color:#FF0000}
+.run-btn i{font-size:14px}
+.results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.vcard{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;cursor:pointer}
+.vcard:hover{border-color:var(--color-border-secondary)}
+.vcard-thumb{width:100%;aspect-ratio:16/9;background:var(--color-background-secondary);overflow:hidden;position:relative}
+.vcard-thumb img{width:100%;height:100%;object-fit:cover}
+.vcard-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--color-text-tertiary);font-size:24px}
+.shorts-pip{position:absolute;top:5px;left:5px;background:#FF0000;color:white;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px}
+.vcard-body{padding:8px 10px}
+.vcard-title{font-size:12px;font-weight:500;color:var(--color-text-primary);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:5px}
+.vcard-meta{display:flex;flex-wrap:wrap;gap:5px}
+.vmeta{font-size:11px;color:var(--color-text-secondary);display:flex;align-items:center;gap:2px}
+.vmeta i{font-size:12px}
+.chip-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.chip{font-size:12px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);background:var(--color-background-primary)}
+.chip.active,.chip:hover{background:#FF0000;color:white;border-color:#FF0000}
+.notice{font-size:12px;color:var(--color-text-secondary);padding:8px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:12px;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.notice i{font-size:14px;flex-shrink:0;margin-top:1px}
+.errbox{padding:10px 14px;background:#fff0f0;border:0.5px solid #f0c0c0;border-radius:var(--border-radius-md);font-size:13px;color:#cc0000;margin-bottom:10px}
+.loading-row{display:flex;align-items:center;gap:8px;padding:1.5rem;color:var(--color-text-secondary);font-size:13px}
+.spin{animation:spin 1s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{padding:2rem;text-align:center;color:var(--color-text-tertiary)}
+.empty i{font-size:32px;margin-bottom:8px;display:block}
+.empty p{font-size:13px}
+.auth-box{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;gap:16px;text-align:center}
+.auth-icon{width:56px;height:56px;background:#FF0000;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:24px}
+.auth-title{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+.auth-sub{font-size:13px;color:var(--color-text-secondary);max-width:320px;line-height:1.6}
+.auth-btn{background:#FF0000;color:white;border:none;padding:10px 22px;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:var(--font-sans)}
+.auth-btn:hover{background:#cc0000}
+.steps{display:flex;flex-direction:column;gap:8px;text-align:left;width:100%;max-width:380px}
+.step{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)}
+.step-num{width:20px;height:20px;background:#FF0000;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.step-text{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.step-text strong{color:var(--color-text-primary);font-weight:500}
+.api-input-row{display:flex;gap:8px;width:100%;max-width:420px;flex-wrap:wrap}
+.api-input-row input{flex:1;min-width:220px;font-size:13px;padding:8px 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.api-input-row input::placeholder{color:var(--color-text-tertiary)}
+.conn-btn{background:#FF0000;color:white;border:none;padding:8px 18px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:var(--font-sans)}
+.conn-btn:hover{background:#cc0000}
+.niche-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px}
+.ncard{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;cursor:pointer}
+.ncard:hover{border-color:#FF0000}
+.ncard-icon{font-size:20px;color:var(--color-text-secondary);margin-bottom:6px}
+.ncard-name{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.ncard-desc{font-size:11px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:8px}
+.ncard-tags{display:flex;gap:5px;flex-wrap:wrap}
+.ntag{font-size:10px;padding:2px 7px;border-radius:3px;font-weight:500}
+.ntag.hot{background:#fff0f0;color:#cc0000}
+.ntag.rising{background:#fffbeb;color:#92400e}
+.ntag.low{background:#f0fdf4;color:#166534}
+.kw-list{display:flex;flex-direction:column;gap:6px}
+.kw-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md)}
+.kw-rank{font-size:11px;color:var(--color-text-tertiary);width:16px}
+.kw-word{flex:1;font-size:13px;color:var(--color-text-primary)}
+.kw-bar-bg{width:80px;height:5px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden}
+.kw-bar-fill{height:100%;border-radius:3px;background:#FF0000}
+.kw-score{font-size:11px;color:var(--color-text-secondary);width:26px;text-align:right}
+.kw-badge{font-size:10px;padding:2px 6px;border-radius:3px;font-weight:500}
+.kw-badge.hot{background:#fff0f0;color:#cc0000}
+.kw-badge.rising{background:#fffbeb;color:#92400e}
+.kw-badge.stable{background:#f0fdf4;color:#166534}
+.ch-header{display:flex;align-items:center;gap:14px;padding:14px;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);margin-bottom:12px;flex-wrap:wrap}
+.ch-avatar{width:52px;height:52px;border-radius:50%;overflow:hidden;background:#FF0000;display:flex;align-items:center;justify-content:center;color:white;font-size:20px;font-weight:700;flex-shrink:0}
+.ch-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.ch-name{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.ch-handle{font-size:12px;color:var(--color-text-secondary)}
+.ch-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:3px;background:#fff0f0;color:#cc0000;font-weight:500;margin-top:3px}
+</style>
+
+<h2 class="sr-only">YT-PO — Full YouTube analytics and research dashboard</h2>
+
+<div class="app">
+  <div class="topbar">
+    <div class="topbar-logo"><i class="ti ti-brand-youtube" aria-hidden="true" style="font-size:20px"></i> YT<span>-PO</span></div>
+    <div class="topbar-nav">
+      <button class="tnav active" onclick="setMode('research')" id="mode-research"><i class="ti ti-search" aria-hidden="true"></i> Research</button>
+      <button class="tnav" onclick="setMode('analytics')" id="mode-analytics"><i class="ti ti-chart-bar" aria-hidden="true"></i> My Analytics</button>
+    </div>
+    <div id="authStatus" style="margin-left:12px;display:flex;align-items:center;gap:6px">
+      <div style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.4)" id="authDot"></div>
+      <span style="font-size:12px;color:rgba(255,255,255,0.8)" id="authLabel">No API key</span>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="sidebar" id="sidebar">
+      <div id="researchNav">
+        <div class="slabel">Research</div>
+        <div class="snav active" onclick="switchPanel('trending')" id="snav-trending"><i class="ti ti-flame" aria-hidden="true"></i> Trending</div>
+        <div class="snav" onclick="switchPanel('search')" id="snav-search"><i class="ti ti-search" aria-hidden="true"></i> Search videos</div>
+        <div class="snav" onclick="switchPanel('shorts')" id="snav-shorts"><i class="ti ti-device-mobile" aria-hidden="true"></i> Shorts finder</div>
+        <div class="snav" onclick="switchPanel('channel')" id="snav-channel"><i class="ti ti-user-circle" aria-hidden="true"></i> Channel lookup</div>
+        <div class="sdivider"></div>
+        <div class="slabel">Discover</div>
+        <div class="snav" onclick="switchPanel('niches')" id="snav-niches"><i class="ti ti-compass" aria-hidden="true"></i> Trending niches</div>
+        <div class="snav" onclick="switchPanel('keywords')" id="snav-keywords"><i class="ti ti-tag" aria-hidden="true"></i> Keywords</div>
+      </div>
+      <div id="analyticsNav" style="display:none">
+        <div class="slabel">Studio</div>
+        <div class="snav active" onclick="switchPanel('overview')" id="snav-overview"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> Overview</div>
+        <div class="snav" onclick="switchPanel('reach')" id="snav-reach"><i class="ti ti-eye" aria-hidden="true"></i> Reach</div>
+        <div class="snav" onclick="switchPanel('engagement')" id="snav-engagement"><i class="ti ti-heart" aria-hidden="true"></i> Engagement</div>
+        <div class="snav" onclick="switchPanel('audience')" id="snav-audience"><i class="ti ti-users" aria-hidden="true"></i> Audience</div>
+        <div class="snav" onclick="switchPanel('revenue')" id="snav-revenue"><i class="ti ti-currency-dollar" aria-hidden="true"></i> Revenue</div>
+        <div class="snav" onclick="switchPanel('videos')" id="snav-videos"><i class="ti ti-video" aria-hidden="true"></i> Videos</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="panel active" id="panel-setup">
+        <div class="auth-box">
+          <div class="auth-icon"><i class="ti ti-key" aria-hidden="true"></i></div>
+          <div class="auth-title">Connect your YouTube API key</div>
+          <div class="auth-sub">Paste your YouTube Data API v3 key below to unlock Research features. For My Analytics (retention, earnings, audience), you'll also need OAuth — see steps below.</div>
+          <div class="api-input-row">
+            <input type="password" id="apiKeyInput" placeholder="AIza... (YouTube Data API v3 key)" />
+            <button class="conn-btn" onclick="connectKey()">Connect</button>
+          </div>
+          <div class="steps">
+            <div class="step"><div class="step-num">1</div><div class="step-text">Go to <strong>console.cloud.google.com</strong> → New project</div></div>
+            <div class="step"><div class="step-num">2</div><div class="step-text">Enable <strong>YouTube Data API v3</strong> and <strong>YouTube Analytics API</strong></div></div>
+            <div class="step"><div class="step-num">3</div><div class="step-text">Credentials → Create API key → paste above</div></div>
+            <div class="step"><div class="step-num">4</div><div class="step-text">For Analytics: also create an <strong>OAuth 2.0 Client ID</strong> → paste the Client ID below when prompted</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-trending">
+        <div class="phead">
+          <div class="ptitle"><i class="ti ti-flame" aria-hidden="true"></i> Trending now</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select class="date-sel" id="trendRegion"><option value="IN">India</option><option value="US">United States</option><option value="GB">United Kingdom</option><option value="JP">Japan</option><option value="BR">Brazil</option></select>
+            <select class="date-sel" id="trendCount"><option value="10">10</option><option value="20" selected>20</option><option value="50">50</option></select>
+            <button class="run-btn" onclick="fetchTrending()"><i class="ti ti-refresh" aria-hidden="true"></i> Refresh</button>
+          </div>
+        </div>
+        <div class="chip-row" id="trendCats">
+          <div class="chip active" data-cat="" onclick="selCat(this)">All</div>
+          <div class="chip" data-cat="20" onclick="selCat(this)">Gaming</div>
+          <div class="chip" data-cat="10" onclick="selCat(this)">Music</div>
+          <div class="chip" data-cat="24" onclick="selCat(this)">Entertainment</div>
+          <div class="chip" data-cat="28" onclick="selCat(this)">Tech</div>
+          <div class="chip" data-cat="17" onclick="selCat(this)">Sports</div>
+          <div class="chip" data-cat="23" onclick="selCat(this)">Comedy</div>
+          <div class="chip" data-cat="22" onclick="selCat(this)">People</div>
+        </div>
+        <div id="trendingResults"><div class="empty"><i class="ti ti-flame" aria-hidden="true"></i><p>Click refresh to load trending</p></div></div>
+      </div>
+
+      <div class="panel" id="panel-search">
+        <div class="ptitle" style="margin-bottom:14px"><i class="ti ti-search" aria-hidden="true"></i> Search videos</div>
+        <div class="search-row">
+          <input type="text" id="searchQ" placeholder="Search..." />
+          <select id="searchOrder"><option value="relevance">Relevance</option><option value="viewCount">Most viewed</option><option value="date">Newest</option><option value="rating">Top rated</option></select>
+          <select id="searchCount"><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option></select>
+          <button class="run-btn" onclick="doSearch()"><i class="ti ti-search" aria-hidden="true"></i> Search</button>
+        </div>
+        <div id="searchResults"><div class="empty"><i class="ti ti-search" aria-hidden="true"></i><p>Search something</p></div></div>
+      </div>
+
+      <div class="panel" id="panel-shorts">
+        <div class="ptitle" style="margin-bottom:14px"><i class="ti ti-device-mobile" aria-hidden="true"></i> Shorts finder</div>
+        <div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i> Uses #shorts + short duration filter. Results are real Shorts from the YouTube API.</div>
+        <div class="search-row">
+          <input type="text" id="shortsQ" placeholder="Niche, e.g. roblox, gaming, food..." />
+          <select id="shortsOrder"><option value="viewCount">Most viewed</option><option value="date">Newest</option><option value="relevance">Relevant</option></select>
+          <button class="run-btn" onclick="doShorts()"><i class="ti ti-device-mobile" aria-hidden="true"></i> Find Shorts</button>
+        </div>
+        <div id="shortsResults"><div class="empty"><i class="ti ti-device-mobile" aria-hidden="true"></i><p>Find viral Shorts in any niche</p></div></div>
+      </div>
+
+      <div class="panel" id="panel-channel">
+        <div class="ptitle" style="margin-bottom:14px"><i class="ti ti-user-circle" aria-hidden="true"></i> Channel lookup</div>
+        <div class="search-row">
+          <input type="text" id="chInput" placeholder="@handle, channel URL, or channel ID..." />
+          <button class="run-btn" onclick="doChannel()"><i class="ti ti-search" aria-hidden="true"></i> Lookup</button>
+        </div>
+        <div id="channelResults"><div class="empty"><i class="ti ti-user-circle" aria-hidden="true"></i><p>Look up any public channel</p></div></div>
+      </div>
+
+      <div class="panel" id="panel-niches">
+        <div class="ptitle" style="margin-bottom:14px"><i class="ti ti-compass" aria-hidden="true"></i> Trending niches</div>
+        <div class="niche-grid" id="nicheGrid"></div>
+      </div>
+
+      <div class="panel" id="panel-keywords">
+        <div class="ptitle" style="margin-bottom:14px"><i class="ti ti-tag" aria-hidden="true"></i> Keyword analyzer</div>
+        <div class="search-row">
+          <input type="text" id="kwSeed" placeholder="Seed keyword e.g. roblox animation..." />
+          <button class="run-btn" onclick="doKeywords()"><i class="ti ti-chart-bar" aria-hidden="true"></i> Analyze</button>
+        </div>
+        <div id="kwResults"><div class="empty"><i class="ti ti-tag" aria-hidden="true"></i><p>Enter a keyword to analyze search volume signals</p></div></div>
+      </div>
+
+      <div class="panel" id="panel-overview">
+        <div class="phead">
+          <div class="ptitle"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> Channel overview</div>
+          <select class="date-sel" id="overviewRange" onchange="renderOverview()">
+            <option value="7">Last 7 days</option>
+            <option value="28" selected>Last 28 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+        </div>
+        <div id="overviewContent"></div>
+      </div>
+
+      <div class="panel" id="panel-reach">
+        <div class="ptitle" style="margin-bottom:14px"><i class="ti ti-eye" aria-hidden="true"></i> Reach</div>
+        <div id="reachContent"></div>
+      </div>
+
+      <div class="panel" id="panel-engagement">
+        <div class="ptitle" style="margin-bottom:14px"><i class="ti ti-heart" aria-hidden="true"></i> Engagement</div>
+        <div id="engagementContent"></div>
+      </div>
+
+      <div class="panel" id="panel-audience">
+        <div class="ptitle" style="margin-bottom:14px"><i class="ti ti-users" aria-hidden="true"></i> Audience</div>
+        <div id="audienceContent"></div>
+      </div>
+
+      <div class="panel" id="panel-revenue">
+        <div class="ptitle" style="margin-bottom:14px"><i class="ti ti-currency-dollar" aria-hidden="true"></i> Revenue</div>
+        <div id="revenueContent"></div>
+      </div>
+
+      <div class="panel" id="panel-videos">
+        <div class="ptitle" style="margin-bottom:14px"><i class="ti ti-video" aria-hidden="true"></i> Top videos</div>
+        <div id="videosContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let API_KEY='', CLIENT_ID='', ACCESS_TOKEN='', currentMode='research', activeCat='', analyticsData=null;
+
+function setMode(m){
+  currentMode=m;
+  document.getElementById('mode-research').className='tnav'+(m==='research'?' active':'');
+  document.getElementById('mode-analytics').className='tnav'+(m==='analytics'?' active':'');
+  document.getElementById('researchNav').style.display=m==='research'?'block':'none';
+  document.getElementById('analyticsNav').style.display=m==='analytics'?'block':'none';
+  if(m==='research'){
+    switchPanel('trending');
+  } else {
+    if(!ACCESS_TOKEN){ showOAuthPanel(); } else { switchPanel('overview'); renderOverview(); }
+  }
+}
+
+function showOAuthPanel(){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const p=document.getElementById('panel-setup');
+  p.classList.add('active');
+  p.innerHTML=`<div class="auth-box">
+    <div class="auth-icon"><i class="ti ti-brand-google" aria-hidden="true"></i></div>
+    <div class="auth-title">Sign in with Google for Analytics</div>
+    <div class="auth-sub">Analytics data (retention, earnings, audience demographics, traffic sources) requires you to sign in as the channel owner via OAuth. Your data never leaves your browser.</div>
+    <div class="api-input-row">
+      <input type="text" id="clientIdInput" placeholder="OAuth 2.0 Client ID (ends in .apps.googleusercontent.com)" style="min-width:280px"/>
+      <button class="conn-btn" onclick="startOAuth()">Sign in with Google</button>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text">In Google Cloud Console → Credentials → Create <strong>OAuth 2.0 Client ID</strong> → Web app</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Add your deployed site URL as an <strong>Authorised JavaScript origin</strong></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">Paste Client ID above and click <strong>Sign in with Google</strong></div></div>
+    </div>
+    <div class="notice" style="max-width:420px"><i class="ti ti-info-circle" aria-hidden="true"></i> In Claude.ai, the OAuth popup is blocked by the sandbox. Deploy this tool (GitHub Pages / Netlify) to use the full Analytics sign-in.</div>
+  </div>`;
+}
+
+function startOAuth(){
+  const cid=document.getElementById('clientIdInput').value.trim();
+  if(!cid){alert('Paste your OAuth Client ID first.');return;}
+  CLIENT_ID=cid;
+  const scopes='https://www.googleapis.com/auth/yt-analytics.readonly https://www.googleapis.com/auth/youtube.readonly';
+  const redirect=encodeURIComponent(window.location.href.split('?')[0]);
+  const url=`https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(cid)}&redirect_uri=${redirect}&response_type=token&scope=${encodeURIComponent(scopes)}`;
+  const w=window.open(url,'_blank','width=500,height=600');
+  if(!w){alert('Popup blocked. Please deploy this tool and try there. See notice above.');}
+}
+
+function connectKey(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  if(!k){alert('Paste your API key.');return;}
+  API_KEY=k;
+  document.getElementById('authDot').style.background='#4ade80';
+  document.getElementById('authLabel').textContent='Connected';
+  setMode('research');
+  switchPanel('trending');
+  fetchTrending();
+  loadNiches();
+}
+
+function switchPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.snav').forEach(s=>s.classList.remove('active'));
+  const p=document.getElementById('panel-'+name);
+  const s=document.getElementById('snav-'+name);
+  if(p) p.classList.add('active');
+  if(s) s.classList.add('active');
+}
+
+function selCat(el){
+  document.querySelectorAll('#trendCats .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  activeCat=el.dataset.cat;
+}
+
+function fmtN(n){n=parseInt(n)||0;if(n>=1e9)return(n/1e9).toFixed(1)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return n.toString();}
+function ago(d){const diff=Math.floor((new Date()-new Date(d))/1000);if(diff<3600)return Math.floor(diff/60)+'m ago';if(diff<86400)return Math.floor(diff/3600)+'h ago';if(diff<604800)return Math.floor(diff/86400)+'d ago';return Math.floor(diff/604800)+'w ago';}
+async function ytGet(url){const r=await fetch(url);const d=await r.json();if(d.error)throw new Error(d.error.message);return d;}
+function loading(id){document.getElementById(id).innerHTML='<div class="loading-row"><i class="ti ti-loader spin" aria-hidden="true" style="font-size:18px"></i> Loading...</div>';}
+function err(id,msg){document.getElementById(id).innerHTML=`<div class="errbox"><i class="ti ti-alert-circle" aria-hidden="true" style="vertical-align:-2px"></i> ${msg}</div>`;}
+function needKey(id){if(!API_KEY){err(id,'Connect your API key first.');return true;}return false;}
+
+function renderVcards(items,cid,shorts){
+  if(!items||!items.length){document.getElementById(cid).innerHTML='<div class="empty"><i class="ti ti-mood-sad" aria-hidden="true"></i><p>No results</p></div>';return;}
+  let h='<div class="results-grid">';
+  items.forEach(i=>{
+    const vid=i.id?.videoId||i.id;const s=i.snippet||{};const st=i.statistics||{};
+    const thumb=s.thumbnails?.medium?.url||'';const title=(s.title||'').replace(/</g,'&lt;');
+    const ch=(s.channelTitle||'').replace(/</g,'&lt;');const date=s.publishedAt?ago(s.publishedAt):'';
+    const views=st.viewCount?fmtN(st.viewCount):'';const likes=st.likeCount?fmtN(st.likeCount):'';
+    h+=`<div class="vcard" onclick="openLink('https://www.youtube.com/watch?v=${vid}')">
+      <div class="vcard-thumb">${thumb?`<img src="${thumb}" alt="" loading="lazy">`:'<div class="vcard-ph"><i class="ti ti-player-play" aria-hidden="true"></i></div>'}${shorts?'<div class="shorts-pip">SHORTS</div>':''}</div>
+      <div class="vcard-body"><div class="vcard-title">${title}</div>
+      <div class="vcard-meta">
+        <span class="vmeta"><i class="ti ti-user" aria-hidden="true"></i>${ch}</span>
+        ${views?`<span class="vmeta"><i class="ti ti-eye" aria-hidden="true"></i>${views}</span>`:''}
+        ${likes?`<span class="vmeta"><i class="ti ti-heart" aria-hidden="true"></i>${likes}</span>`:''}
+        ${date?`<span class="vmeta"><i class="ti ti-clock" aria-hidden="true"></i>${date}</span>`:''}
+      </div></div></div>`;
+  });
+  h+='</div>';document.getElementById(cid).innerHTML=h;
+}
+
+async function fetchTrending(){
+  if(needKey('trendingResults'))return;
+  loading('trendingResults');
+  const reg=document.getElementById('trendRegion').value;
+  const cnt=document.getElementById('trendCount').value;
+  try{
+    let url=`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=${reg}&maxResults=${cnt}&key=${API_KEY}`;
+    if(activeCat)url+=`&videoCategoryId=${activeCat}`;
+    const d=await ytGet(url);renderVcards(d.items,'trendingResults',false);
+  }catch(e){err('trendingResults',e.message);}
+}
+
+async function doSearch(){
+  if(needKey('searchResults'))return;
+  const q=document.getElementById('searchQ').value.trim();if(!q)return;
+  const ord=document.getElementById('searchOrder').value;const cnt=document.getElementById('searchCount').value;
+  loading('searchResults');
+  try{
+    const sd=await ytGet(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&type=video&order=${ord}&maxResults=${cnt}&key=${API_KEY}`);
+    const ids=sd.items.map(i=>i.id?.videoId).filter(Boolean).join(',');
+    if(!ids){document.getElementById('searchResults').innerHTML='<div class="empty"><i class="ti ti-mood-sad" aria-hidden="true"></i><p>No results</p></div>';return;}
+    const st=await ytGet(`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${ids}&key=${API_KEY}`);
+    const sm={};st.items.forEach(i=>{sm[i.id]=i.statistics;});
+    renderVcards(sd.items.map(i=>({...i,statistics:sm[i.id?.videoId]||{}})),'searchResults',false);
+  }catch(e){err('searchResults',e.message);}
+}
+
+async function doShorts(){
+  if(needKey('shortsResults'))return;
+  const q=(document.getElementById('shortsQ').value.trim()||'shorts')+' #shorts';
+  const ord=document.getElementById('shortsOrder').value;
+  loading('shortsResults');
+  try{
+    const sd=await ytGet(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&type=video&videoDuration=short&order=${ord}&maxResults=20&key=${API_KEY}`);
+    const ids=sd.items.map(i=>i.id?.videoId).filter(Boolean).join(',');
+    if(!ids){document.getElementById('shortsResults').innerHTML='<div class="empty"><i class="ti ti-mood-sad" aria-hidden="true"></i><p>No Shorts found</p></div>';return;}
+    const st=await ytGet(`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${ids}&key=${API_KEY}`);
+    const sm={};st.items.forEach(i=>{sm[i.id]=i.statistics;});
+    renderVcards(sd.items.map(i=>({...i,statistics:sm[i.id?.videoId]||{}})),'shortsResults',true);
+  }catch(e){err('shortsResults',e.message);}
+}
+
+async function doChannel(){
+  if(needKey('channelResults'))return;
+  let inp=document.getElementById('chInput').value.trim();if(!inp)return;
+  loading('channelResults');
+  try{
+    let cid='';
+    if(inp.startsWith('@')){const d=await ytGet(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&forHandle=${encodeURIComponent(inp.slice(1))}&key=${API_KEY}`);if(d.items?.length)cid=d.items[0].id;}
+    else if(inp.includes('youtube.com/')){const m=inp.match(/\/@([^/?]+)/)||inp.match(/\/channel\/([^/?]+)/);if(m){if(inp.includes('/@')){const d=await ytGet(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&forHandle=${encodeURIComponent(m[1])}&key=${API_KEY}`);if(d.items?.length)cid=d.items[0].id;}else cid=m[1];}}
+    else if(inp.startsWith('UC')){cid=inp;}
+    else{const d=await ytGet(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(inp)}&type=channel&maxResults=1&key=${API_KEY}`);if(d.items?.length)cid=d.items[0].id?.channelId;}
+    if(!cid){err('channelResults','Channel not found.');return;}
+    const cd=await ytGet(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,brandingSettings&id=${cid}&key=${API_KEY}`);
+    if(!cd.items?.length){err('channelResults','No data found.');return;}
+    const ch=cd.items[0];const sn=ch.snippet||{};const st=ch.statistics||{};
+    const name=(sn.title||'').replace(/</g,'&lt;');const desc=(sn.description||'').slice(0,160).replace(/</g,'&lt;');
+    const thumb=sn.thumbnails?.medium?.url||'';const subs=st.hiddenSubscriberCount?'Hidden':fmtN(st.subscriberCount);
+    const vd=await ytGet(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${cid}&type=video&order=viewCount&maxResults=8&key=${API_KEY}`);
+    const vids=vd.items||[];const vidIds=vids.map(i=>i.id?.videoId).filter(Boolean).join(',');
+    let statMap={};
+    if(vidIds){const vs=await ytGet(`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${vidIds}&key=${API_KEY}`);vs.items.forEach(i=>{statMap[i.id]=i.statistics;});}
+    let h=`<div class="ch-header">
+      <div class="ch-avatar">${thumb?`<img src="${thumb}" alt="">`:(name[0]||'?')}</div>
+      <div><div class="ch-name">${name}</div><div class="ch-handle">${sn.customUrl||''}</div><div class="ch-badge">${subs} subscribers</div></div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label"><i class="ti ti-eye" aria-hidden="true"></i> Total views</div><div class="kpi-val">${fmtN(st.viewCount)}</div></div>
+      <div class="kpi"><div class="kpi-label"><i class="ti ti-video" aria-hidden="true"></i> Videos</div><div class="kpi-val">${fmtN(st.videoCount)}</div></div>
+      <div class="kpi"><div class="kpi-label"><i class="ti ti-users" aria-hidden="true"></i> Subscribers</div><div class="kpi-val">${subs}</div></div>
+      <div class="kpi"><div class="kpi-label"><i class="ti ti-calendar" aria-hidden="true"></i> Since</div><div class="kpi-val">${sn.publishedAt?new Date(sn.publishedAt).getFullYear():'—'}</div></div>
+    </div>
+    ${desc?`<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.6">${desc}${desc.length===160?'…':''}</div>`:''}
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px">Top videos</div>
+    <div class="results-grid">`;
+    vids.forEach(i=>{
+      const vid=i.id?.videoId;const s=i.snippet||{};const st2=statMap[vid]||{};
+      const thumb2=s.thumbnails?.medium?.url||'';const title=(s.title||'').replace(/</g,'&lt;');
+      const views=st2.viewCount?fmtN(st2.viewCount):'';
+      h+=`<div class="vcard" onclick="openLink('https://www.youtube.com/watch?v=${vid}')">
+        <div class="vcard-thumb">${thumb2?`<img src="${thumb2}" alt="" loading="lazy">`:'<div class="vcard-ph"><i class="ti ti-player-play" aria-hidden="true"></i></div>'}</div>
+        <div class="vcard-body"><div class="vcard-title">${title}</div>
+        <div class="vcard-meta">${views?`<span class="vmeta"><i class="ti ti-eye" aria-hidden="true"></i>${views}</span>`:''}</div></div></div>`;
+    });
+    h+='</div>';
+    document.getElementById('channelResults').innerHTML=h;
+  }catch(e){err('channelResults',e.message);}
+}
+
+async function doKeywords(){
+  if(needKey('kwResults'))return;
+  const seed=document.getElementById('kwSeed').value.trim();if(!seed)return;
+  loading('kwResults');
+  const variants=[seed,seed+' tutorial',seed+' ideas',seed+' 2025','best '+seed,seed+' shorts',seed+' viral',seed+' for beginners'];
+  try{
+    const results=await Promise.all(variants.map(kw=>ytGet(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(kw)}&type=video&order=viewCount&maxResults=5&key=${API_KEY}`).then(d=>({kw,count:d.pageInfo?.totalResults||0})).catch(()=>({kw,count:0}))));
+    const max=Math.max(...results.map(r=>r.count),1);
+    const badges=['hot','hot','rising','rising','rising','stable','stable','stable'];
+    let h='<div class="kw-list">';
+    results.sort((a,b)=>b.count-a.count).forEach((r,i)=>{
+      const pct=Math.round(r.count/max*100);
+      h+=`<div class="kw-item"><span class="kw-rank">#${i+1}</span><span class="kw-word">${r.kw.replace(/</g,'&lt;')}</span>
+        <div class="kw-bar-bg"><div class="kw-bar-fill" style="width:${pct}%"></div></div>
+        <span class="kw-score">${pct}</span>
+        <span class="kw-badge ${badges[i]}">${badges[i]}</span></div>`;
+    });
+    h+='</div>';document.getElementById('kwResults').innerHTML=h;
+  }catch(e){err('kwResults',e.message);}
+}
+
+function loadNiches(){
+  const niches=[
+    {icon:'ti-device-gamepad-2',name:'Roblox & blocky gaming',desc:'Animation fails, shorts, funny moments',comp:'High',opp:'hot',trend:'rising'},
+    {icon:'ti-brain',name:'AI tools & productivity',desc:'Prompts, tool reviews, automation',comp:'Medium',opp:'hot',trend:'hot'},
+    {icon:'ti-mood-smile',name:'Shrinkflation reactions',desc:'Then vs now, size comparison, rage reactions',comp:'Medium',opp:'hot',trend:'hot'},
+    {icon:'ti-artboard',name:'3D animation process',desc:'Blender timelapse, rig reveals, bloopers',comp:'Low',opp:'rising',trend:'low'},
+    {icon:'ti-chef-hat',name:'Food comparisons',desc:'Viral size tests, brand nostalgia',comp:'High',opp:'hot',trend:'hot'},
+    {icon:'ti-currency-dollar',name:'Gen Z finance',desc:'Budget, invest, side hustle explained simply',comp:'Medium',opp:'rising',trend:'rising'},
+    {icon:'ti-barbell',name:'Gym & fitness shorts',desc:'Form checks, transformations, quick tips',comp:'High',opp:'rising',trend:'rising'},
+    {icon:'ti-planet',name:'Satisfying builds',desc:'Lego, pixel art, satisfying ASMR construction',comp:'Medium',opp:'rising',trend:'rising'},
+  ];
+  let h='';
+  niches.forEach(n=>{
+    h+=`<div class="ncard" onclick="searchNiche('${n.name.replace(/'/g,"\\'")}')">
+      <div class="ncard-icon"><i class="ti ${n.icon}" aria-hidden="true"></i></div>
+      <div class="ncard-name">${n.name}</div>
+      <div class="ncard-desc">${n.desc}</div>
+      <div class="ncard-tags">
+        <span class="ntag ${n.opp}">${n.opp}</span>
+        <span class="ntag ${n.trend}">${n.comp} competition</span>
+        <span class="ntag low">click to explore</span>
+      </div></div>`;
+  });
+  document.getElementById('nicheGrid').innerHTML=h;
+}
+function searchNiche(name){document.getElementById('searchQ').value=name;switchPanel('search');if(API_KEY)doSearch();}
+
+function renderOverview(){
+  const days=parseInt(document.getElementById('overviewRange').value)||28;
+  const seed=days;
+  function rnd(min,max){return Math.round(min+Math.random()*(max-min));}
+  const views=rnd(12000,80000)*seed/28;
+  const watchHrs=rnd(800,5000)*seed/28;
+  const subs=rnd(50,800)*seed/28;
+  const impressions=rnd(40000,200000)*seed/28;
+  const ctr=(2.5+Math.random()*4).toFixed(1);
+  const avd=`${rnd(1,5)}:${String(rnd(10,59)).padStart(2,'0')}`;
+  const labels=[];const vals=[];
+  for(let i=Math.min(days,14)-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);labels.push(d.toLocaleDateString('en',{month:'short',day:'numeric'}));vals.push(rnd(300,4000));}
+  const maxV=Math.max(...vals);
+  let bars='';
+  labels.forEach((l,i)=>{const h=Math.round(vals[i]/maxV*100);bars+=`<div class="bar-col"><div class="bar-spacer"></div><div class="bar-inner" style="height:${h}%" title="${fmtN(vals[i])} views"></div><div class="bar-label">${l.split(' ')[0]}</div></div>`;});
+  document.getElementById('overviewContent').innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label"><i class="ti ti-eye" aria-hidden="true"></i> Views</div><div class="kpi-val">${fmtN(Math.round(views))}</div><div class="kpi-delta up">+${rnd(5,28)}% vs prev</div></div>
+      <div class="kpi"><div class="kpi-label"><i class="ti ti-clock" aria-hidden="true"></i> Watch hours</div><div class="kpi-val">${fmtN(Math.round(watchHrs))}</div><div class="kpi-delta up">+${rnd(3,18)}%</div></div>
+      <div class="kpi"><div class="kpi-label"><i class="ti ti-users" aria-hidden="true"></i> Subscribers</div><div class="kpi-val">+${fmtN(Math.round(subs))}</div><div class="kpi-delta up">+${rnd(2,15)}%</div></div>
+      <div class="kpi"><div class="kpi-label"><i class="ti ti-photo" aria-hidden="true"></i> Impressions</div><div class="kpi-val">${fmtN(Math.round(impressions))}</div><div class="kpi-delta ${Math.random()>0.4?'up':'down'}">${Math.random()>0.4?'+':'−'}${rnd(1,12)}%</div></div>
+      <div class="kpi"><div class="kpi-label"><i class="ti ti-hand-click" aria-hidden="true"></i> CTR</div><div class="kpi-val">${ctr}%</div></div>
+      <div class="kpi"><div class="kpi-label"><i class="ti ti-clock" aria-hidden="true"></i> Avg view duration</div><div class="kpi-val">${avd}</div></div>
+    </div>
+    <div class="chart-card"><div class="chart-title"><i class="ti ti-chart-bar" aria-hidden="true" style="font-size:14px;color:#FF0000"></i> Views over time</div><div class="chart-wrap"><div class="bar-chart">${bars}</div></div></div>
+    <div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i> Analytics data shown is estimated/demo. Deploy with OAuth to see your real channel data from YouTube Analytics API.</div>`;
+}
+
+function renderReach(){
+  document.getElementById('reachContent').innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Impressions</div><div class="kpi-val">142K</div><div class="kpi-delta up">+12%</div></div>
+      <div class="kpi"><div class="kpi-label">Unique viewers</div><div class="kpi-val">38.4K</div><div class="kpi-delta up">+8%</div></div>
+      <div class="kpi"><div class="kpi-label">CTR</div><div class="kpi-val">4.2%</div></div>
+    </div>
+    <div class="chart-card"><div class="chart-title"><i class="ti ti-road" aria-hidden="true" style="font-size:14px;color:#FF0000"></i> Traffic sources</div>
+    ${[['YouTube search','ti-search',62],['Browse features','ti-layout-grid',18],['External','ti-external-link',10],['Suggested videos','ti-player-play',7],['Direct / other','ti-dots',3]].map(([src,ic,pct])=>`
+    <div class="traffic-row"><div class="traffic-src"><i class="ti ${ic}" aria-hidden="true"></i>${src}</div><div class="traffic-bar-bg"><div class="traffic-bar-fill" style="width:${pct}%"></div></div><div class="traffic-pct">${pct}%</div></div>`).join('')}
+    </div>
+    <div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i> Demo data. Real data available after OAuth sign-in on deployed version.</div>`;
+}
+
+function renderEngagement(){
+  const ret=[[0,100],[10,82],[20,68],[30,55],[40,44],[50,37],[60,31],[80,22],[100,15]];
+  let retHtml='';
+  ret.forEach(([t,p])=>{retHtml+=`<div class="ret-bar-row"><div class="ret-time">${t}%</div><div class="ret-bar-bg"><div class="ret-bar-fill" style="width:${p}%"></div></div><div class="ret-pct">${p}%</div></div>`;});
+  document.getElementById('engagementContent').innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Likes</div><div class="kpi-val">2.1K</div><div class="kpi-delta up">+14%</div></div>
+      <div class="kpi"><div class="kpi-label">Comments</div><div class="kpi-val">184</div><div class="kpi-delta up">+6%</div></div>
+      <div class="kpi"><div class="kpi-label">Shares</div><div class="kpi-val">312</div><div class="kpi-delta up">+22%</div></div>
+      <div class="kpi"><div class="kpi-label">Avg % watched</div><div class="kpi-val">42%</div></div>
+    </div>
+    <div class="chart-card"><div class="chart-title"><i class="ti ti-chart-line" aria-hidden="true" style="font-size:14px;color:#FF0000"></i> Audience retention curve (estimated avg)</div>${retHtml}</div>
+    <div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i> Retention data shown is illustrative. Real per-video retention graphs need OAuth + YouTube Analytics API.</div>`;
+}
+
+function renderAudience(){
+  document.getElementById('audienceContent').innerHTML=`
+    <div class="two-col">
+      <div class="chart-card"><div class="chart-title">Age groups</div>
+        ${[['13–17','ti-face-id',8,'#FF0000'],['18–24','ti-face-id',38,'#FF0000'],['25–34','ti-face-id',28,'#FF4444'],['35–44','ti-face-id',14,'#FF7777'],['45+','ti-face-id',12,'#FFAAAA']].map(([l,,p,c])=>`
+        <div class="demo-row"><div class="demo-label">${l}</div><div class="demo-bar-bg"><div class="demo-bar-fill" style="width:${p}%;background:${c}"></div></div><div class="demo-pct">${p}%</div></div>`).join('')}
+      </div>
+      <div class="chart-card"><div class="chart-title">Gender</div>
+        <div class="demo-row"><div class="demo-label">Male</div><div class="demo-bar-bg"><div class="demo-bar-fill" style="width:72%;background:#FF0000"></div></div><div class="demo-pct">72%</div></div>
+        <div class="demo-row"><div class="demo-label">Female</div><div class="demo-bar-bg"><div class="demo-bar-fill" style="width:26%;background:#FF6666"></div></div><div class="demo-pct">26%</div></div>
+        <div class="demo-row"><div class="demo-label">Other</div><div class="demo-bar-bg"><div class="demo-bar-fill" style="width:2%;background:#FFAAAA"></div></div><div class="demo-pct">2%</div></div>
+      </div>
+    </div>
+    <div class="chart-card"><div class="chart-title">Top countries</div>
+      ${[['India','IN',44],['United States','US',18],['Pakistan','PK',8],['United Kingdom','GB',5],['Indonesia','ID',4]].map(([c,,p])=>`
+      <div class="demo-row"><div class="demo-label">${c}</div><div class="demo-bar-bg"><div class="demo-bar-fill" style="width:${p}%;background:#FF0000"></div></div><div class="demo-pct">${p}%</div></div>`).join('')}
+    </div>
+    <div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i> Audience demographics shown are sample/estimated. Real data requires OAuth sign-in on your deployed site.</div>`;
+}
+
+function renderRevenue(){
+  document.getElementById('revenueContent').innerHTML=`
+    <div class="chart-card">
+      <div class="earn-big">$0.00</div>
+      <div class="earn-sub">Estimated revenue this month</div>
+      <div style="margin-top:16px;font-size:13px;color:var(--color-text-secondary);line-height:1.7">
+        Revenue data (RPM, CPM, estimated earnings) is gated behind <strong style="color:var(--color-text-primary)">YouTube Analytics API</strong> with OAuth. It's only visible to the channel owner after sign-in.<br><br>
+        Once you deploy YT-PO and sign in with your Google account, this panel will show:<br>
+      </div>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+        ${[['Estimated revenue','Monthly & per video earnings'],['RPM','Revenue per 1,000 views'],['CPM','Cost per 1,000 impressions'],['Ad types breakdown','Skippable, display, overlay']].map(([k,v])=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)"><div style="font-size:13px;font-weight:500;color:var(--color-text-primary);flex:1">${k}</div><div style="font-size:12px;color:var(--color-text-secondary)">${v}</div></div>`).join('')}
+      </div>
+    </div>
+    <div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i> Channel must be in YouTube Partner Program (YPP) for revenue data to exist.</div>`;
+}
+
+function renderVideos(){
+  if(needKey('videosContent'))return;
+  document.getElementById('videosContent').innerHTML='<div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i> Enter your channel ID or sign in via OAuth to see your video performance table.</div>';
+}
+
+document.getElementById('panel-overview').addEventListener('click',function(){});
+['reach','engagement','audience','revenue','videos'].forEach(p=>{
+  document.getElementById('snav-'+p).addEventListener('click',function(){
+    if(p==='reach')renderReach();
+    if(p==='engagement')renderEngagement();
+    if(p==='audience')renderAudience();
+    if(p==='revenue')renderRevenue();
+    if(p==='videos')renderVideos();
+  });
+});
+
+loadNiches();
+</script>
+
+
+<style id="chatgpt-responsive-upgrade">
+:root{
+ --yt-bg:#0f0f0f;
+ --yt-surface:#181818;
+ --yt-card:#212121;
+ --yt-text:#f1f1f1;
+ --yt-muted:#aaaaaa;
+}
+.app,.content,.sidebar,.panel,.chart-card,.kpi,.vcard,.ncard,.kw-item{
+ background:var(--yt-bg)!important;
+ color:var(--yt-text)!important;
+}
+.sidebar,.chart-card,.vcard,.ncard,.kw-item,.kpi{
+ border-color:#303030!important;
+}
+.topbar{
+ background:#0f0f0f!important;
+ border-bottom:1px solid #303030;
+}
+.topbar-logo{color:#fff!important}
+.content{background:#0f0f0f!important}
+.panel{padding:20px}
+.results-grid{
+ grid-template-columns:repeat(auto-fill,minmax(280px,1fr))!important;
+}
+.vcard-thumb iframe{
+ width:100%;
+ height:100%;
+ border:0;
+}
+@media (max-width:900px){
+ .body{flex-direction:column!important;}
+ .sidebar{
+   width:100%!important;
+   border-right:none!important;
+   border-bottom:1px solid #303030!important;
+   overflow-x:auto;
+   display:flex;
+   gap:8px;
+   padding:10px;
+ }
+ .snav,.slabel,.sdivider{
+   white-space:nowrap;
+ }
+ .slabel,.sdivider{display:none!important;}
+ .kpi-grid,.two-col,.results-grid{
+   grid-template-columns:1fr!important;
+ }
+ .panel{padding:12px!important;}
+ .search-row{
+   flex-direction:column!important;
+ }
+ .search-row input,
+ .search-row select,
+ .run-btn{
+   width:100%!important;
+ }
+}
+</style>
+
+
+<script>
+function openLink(url){
+ const vid=(url.match(/v=([^&]+)/)||[])[1];
+ if(!vid){window.open(url,'_blank');return;}
+ const existing=document.getElementById('videoModal');
+ if(existing) existing.remove();
+ const modal=document.createElement('div');
+ modal.id='videoModal';
+ modal.style='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+ modal.innerHTML=`
+   <div style="width:min(1100px,95vw)">
+      <div style="text-align:right;margin-bottom:10px">
+         <button onclick="document.getElementById('videoModal').remove()" style="padding:8px 12px;cursor:pointer">Close</button>
+      </div>
+      <div style="position:relative;padding-top:56.25%">
+        <iframe src="https://www.youtube.com/embed/${vid}?autoplay=1"
+        allow="autoplay; encrypted-media" allowfullscreen
+        style="position:absolute;inset:0;width:100%;height:100%"></iframe>
+      </div>
+   </div>`;
+ document.body.appendChild(modal);
+}
+</script>
